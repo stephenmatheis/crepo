@@ -34,7 +34,17 @@ await $`git init`
 await $`git add .`
 await $`git commit -m "Initial commit via mkrepo"`
 await $`npx prettier --write .`
+
 await $`code .`
-await $`open -g rectangle://execute-action?name=left-half`
+await snapWindow('left-half')
+
 await $`open -a "Google Chrome" http://localhost:${projectType === 'Next.js' ? 3000 : 5173}`
-await $`open -g rectangle://execute-action?name=right-half`
+await snapWindow('right-half')
+
+async function snapWindow(position) {
+    const isRectangleInstalled = await $`ls /Applications/Rectangle.app`.then(() => true).catch(() => false)
+
+    if (isRectangleInstalled) {
+        await $`open -g rectangle://execute-action?name=${position}`
+    }
+}
