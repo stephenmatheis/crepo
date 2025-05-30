@@ -18,7 +18,6 @@ const banner = figlet.textSync('crepo', {
 
 console.log(cristal(banner));
 
-
 const args = process.argv.slice(2)
 let projectType
 let name
@@ -45,8 +44,7 @@ if (process.stdin.isTTY) {
     process.stdin.resume()
     process.stdin.setEncoding('utf8')
     process.stdin.on('data', (key) => {
-        if (key === '\u001b') cleanExit('✌️')
-        if (key === '\u0003') cleanExit('✌️')
+        if (key === '\u001b' || key === '\u0003') cleanExit('✌️')
     })
 }
 
@@ -65,14 +63,48 @@ if (/^--?[\w-]+$/.test(name)) {
 
 name = sanitizeName(name)
 
+const isTestMode = process.env.TEST_MODE === 'true'
 const isNext = projectType === 'Next.js'
 const scaffoldSpinner = ora(`Scaffolding ${projectType} ...`).start()
+const npmPath = (await $`which npm`).stdout.trim()
+const nodePath = (await $`which node`).stdout.trim()
+const npxPath = isNext ? (await $`which npx`).stdout.trim() : null
+const binDirs = new Set([
+    path.dirname(npmPath),
+    path.dirname(nodePath),
+    ...(npxPath ? [path.dirname(npxPath)] : []),
+])
+const PATH = [...binDirs, process.env.PATH].join(':')
 
 try {
     if (isNext) {
-        await $({ stdio: 'pipe' })`npx create-next-app@latest ${name} --ts --eslint --use-npm --no-tailwind --app --no-src-dir --import-alias '@/*' --turbopack --no-interactive`
+        if (!npxPath) {
+            scaffoldSpinner.fail('npx not found in PATH')
+            process.exit(1)
+        }
+
+        await $({
+            env: {
+                ...process.env,
+                CI: 'true',
+                FORCE_COLOR: '0',
+                PATH: PATH,
+            },
+            stdio: 'pipe',
+        })`${npxPath} create-next-app@latest ${name} --ts --eslint --use-npm --no-tailwind --app --no-src-dir --import-alias '@/*' --turbopack --no-interactive`
     } else {
-        await $({ stdio: 'pipe' })`npm create vite@latest ${name} -- --template react-ts`
+        if (!npmPath) {
+            scaffoldSpinner.fail('npm not found in PATH')
+            process.exit(1)
+        }
+
+        await $({
+            env: {
+                ...process.env,
+                CI: 'true',
+                PATH: PATH,
+            },
+        })`${npmPath} create vite@latest ${name} -- --template react-ts`
     }
 
     scaffoldSpinner.text = `${projectType} app created`
@@ -116,67 +148,74 @@ try {
 
     if (!isNext) {
         scaffoldSpinner.text = 'Installing dependencies...'
-        await $({ stdio: 'pipe' })`npm install`
+        await $({ stdio: 'pipe', env: { ...process.env, PATH: PATH } })`npm install`
     }
 
     scaffoldSpinner.text = 'Formatting with Prettier...'
 
     await $`echo "# ${name}\n\nScaffolded with \`crepo\`." > README.md`
-    await $`npx prettier --write .`
+    await $({ env: { ...process.env, PATH: PATH } })`npx prettier --write .`
 
-    scaffoldSpinner.text = 'Initializing Git...'
 
-    await $`git init`
-    await $`git add .`
-    await $`git commit -m "init"`
+    if (!isTestMode) {
+        scaffoldSpinner.text = 'Initializing Git...'
 
-    const isGHInstalled = await isInstalled('gh');
-    const hasRemote = await $`git remote`.then(out => out.stdout.trim() !== '').catch(() => false)
+        await $`git init`
+        await $`git add .`
+        await $`git commit -m "init"`
 
-    if (!hasRemote && isGHInstalled) {
-        const createRemote = await confirm({ message: 'Create GitHub repo and push?' })
+        const isGHInstalled = await isInstalled('gh');
+        const hasRemote = await $`git remote`.then(out => out.stdout.trim() !== '').catch(() => false)
 
-        if (createRemote) {
-            await $`gh repo create ${name} --private --source=. --push`
-            await $`gh repo view --web`
+        if (!hasRemote && isGHInstalled) {
+            const createRemote = await confirm({ message: 'Create GitHub repo and push?' })
+
+            if (createRemote) {
+                await $`gh repo create ${name} --private --source=. --push`
+                await $`gh repo view --web`
+            }
         }
     }
 
     const isCodeInstalled = await isInstalled('code');
 
-    if (isCodeInstalled) {
+    if (!isTestMode && isCodeInstalled) {
         await $`code .`
         await snapWindow('left-half')
     } else {
-        console.log(chalk.cyan('VS Code (code) CLI not found. Skipping editor launch.'))
+        console.log(chalk.cyan(isTestMode ? 'Skipping VS Code launch in test mode.' : 'VS Code (code) CLI not found. Skipping editor launch.'))
     }
 
     const isChromeInstalled = await isInstalled('google-chrome') || await isInstalled('chrome');
 
-    if (isChromeInstalled) {
+    if (!isTestMode && isChromeInstalled) {
         await $`open -a "Google Chrome" http://localhost:${isNext ? 3000 : 5173}`
         await snapWindow('right-half')
     } else {
-        console.log(chalk.cyan('Chrome not found. Skipping browser launch.'))
+        console.log(chalk.cyan(isTestMode ? 'Skipping Chrome launch in test mode.' : 'Chrome not found. Skipping browser launch.'))
     }
 
     scaffoldSpinner.succeed('Done.');
 
-    console.log(chalk.greenBright(`\n✨ ${name} is ready ✌️\n`));
-} catch (error) {
-    scaffoldSpinner.fail('Something went wrong.');
-    console.error(err);
-    process.exit(1);
+    console.log(chalk.greenBright(`\n${name} is ready ✌️\n`));
+
+    cleanExit('Done')
+} catch (err) {
+    scaffoldSpinner.fail(`Failed during: ${scaffoldSpinner.text}`)
+
+    console.error(err)
+
+    cleanExit('Exiting with error', 1)
 }
 
-function cleanExit(message) {
+function cleanExit(message, code = 0) {
     if (process.stdin.isTTY) {
         process.stdin.setRawMode(false)
         process.stdin.pause()
     }
 
     console.log(`\n${message}`)
-    process.exit(0)
+    setTimeout(() => process.exit(code), 0);
 }
 
 async function isInstalled(cmd) {

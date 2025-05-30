@@ -50,6 +50,6 @@ Then sit back while `crepo`:
 
 ---
 
-## 🌱 Author
+## Author
 
 [Stephen Matheis](https://github.com/stephenmatheis)
