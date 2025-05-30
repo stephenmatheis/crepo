@@ -5,7 +5,7 @@ import path from 'path'
 import { select, input } from '@inquirer/prompts'
 import 'zx/globals'
 
-console.log(`\nmkrepo - spin up your next repo in seconds\n`)
+console.log(`\ncrepo - spin up your next repo in seconds\n`)
 
 const projectType = await select({
     message: 'Choose a project type:',
@@ -32,7 +32,7 @@ await Promise.all([
 await $`npm install`
 await $`git init`
 await $`git add .`
-await $`git commit -m "Initial commit via mkrepo"`
+await $`git commit -m "Initial commit via crepo"`
 await $`npx prettier --write .`
 
 await $`code .`

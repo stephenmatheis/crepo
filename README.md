@@ -1,4 +1,4 @@
-# mkrepo
+# crepo
 
 Creates a pre-configured Next.js or Vite project in seconds with Git, ESLint, Prettier, and window snapping via Rectangle.
 
@@ -12,7 +12,7 @@ Creates a pre-configured Next.js or Vite project in seconds with Git, ESLint, Pr
 
 ## Add Templates
 
-Before using `mkrepo`, create a `~/dev-templates/` directory that holds your config files.
+Before using `crepo`, create a `~/dev-templates/` directory that holds your config files.
 
 ### Required structure:
 
@@ -30,7 +30,7 @@ Before using `mkrepo`, create a `~/dev-templates/` directory that holds your con
 ## Usage
 
 ```bash
-npx mkrepo
+npx crepo
 ```
 
 Follow the prompts to:
@@ -38,7 +38,7 @@ Follow the prompts to:
 -   Choose a framework (Next.js or Vite)
 -   Name your project
 
-Then sit back while `mkrepo`:
+Then sit back while `crepo`:
 
 -   Scaffolds the app
 -   Installs dependencies

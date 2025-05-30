@@ -1,14 +1,14 @@
 {
-    "name": "mkrepo",
+    "name": "crepo",
     "version": "1.0.0",
     "description": "Create a new Next.js or Vite repo with your preferred setup.",
     "repository": {
         "type": "git",
-        "url": "https://github.com/stephenmatheis/mkrepo.git"
+        "url": "git+https://github.com/stephenmatheis/crepo.git"
     },
-    "homepage": "https://github.com/stephenmatheis/mkrepo#readme",
+    "homepage": "https://github.com/stephenmatheis/crepo#readme",
     "bugs": {
-        "url": "https://github.com/stephenmatheis/mkrepo/issues"
+        "url": "https://github.com/stephenmatheis/crepo/issues"
     },
     "author": "Stephen Matheis",
     "license": "MIT",
@@ -18,11 +18,11 @@
         "repo",
         "nextjs",
         "vite",
-        "mkrepo"
+        "crepo"
     ],
     "preferGlobal": true,
     "bin": {
-        "mkrepo": "./index.mjs"
+        "crepo": "index.mjs"
     },
     "type": "module",
     "dependencies": {
