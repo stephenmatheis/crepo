@@ -1,0 +1,27 @@
+{
+    "name": "mkrepo",
+    "version": "1.0.0",
+    "description": "Create a new Next.js or Vite repo with your preferred setup.",
+    "author": "Stephen Matheis",
+    "license": "MIT",
+    "keywords": [
+        "cli",
+        "create",
+        "repo",
+        "nextjs",
+        "vite",
+        "mkrepo"
+    ],
+    "preferGlobal": true,
+    "main": "index.js",
+    "bin": {
+        "mkrepo": "./index.mjs"
+    },
+    "type": "module",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "dependencies": {
+        "zx": "^8.5.4"
+    }
+}
