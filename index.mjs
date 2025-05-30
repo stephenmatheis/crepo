@@ -1,9 +1,13 @@
 #!/usr/bin/env node
 
+import { homedir } from 'os'
+import path from 'path'
+import { select, input } from '@inquirer/prompts'
+import { setTimeout as wait } from 'timers/promises'
 import 'zx/globals'
 
 // Title screen
-console.log(`\nmkrepo - spin up your next repo in seconds\n`)
+console.log(`\n🚀 mkrepo - spin up your next repo in seconds\n`)
 
 // Ask project type
 const projectType = await select({
@@ -16,7 +20,7 @@ const name = await input({ message: 'Project name:' })
 
 // Create project
 if (projectType === 'Next.js') {
-    await $`npx create-next-app@latest ${name} --typescript --app --eslint --no-interactive`
+    await $({ stdio: 'inherit' })`npx create-next-app@latest ${name} --ts --eslint --use-npm --no-tailwind --app --no-src-dir --import-alias '@/*' --turbopack --no-interactive`
 } else {
     await $`npm create vite@latest ${name} -- --template react-ts`
 }
@@ -24,15 +28,15 @@ if (projectType === 'Next.js') {
 // Change into project directory
 cd(name)
 
-const templateDir = `~/dev-templates/${projectType === 'Next.js' ? 'nextjs' : 'vite'}`
+const templateDir = path.join(homedir(), 'dev-templates', projectType === 'Next.js' ? 'nextjs' : 'vite')
 
 // Copy shared Prettier config
-await $`cp ~/dev-templates/.prettierrc.json .`
+await $`cp ${path.join(homedir(), 'dev-templates', '.prettierrc.json')} .`
 
 // Copy project-specific ESLint and TS configs
 await Promise.all([
-    $`cp ${templateDir}/eslint.config.mjs .`,
-    $`cp ${templateDir}/tsconfig.json .`,
+    $`cp ${path.join(templateDir, 'eslint.config.mjs')} .`,
+    $`cp ${path.join(templateDir, 'tsconfig.json')} .`,
 ])
 
 // Install dependencies
@@ -48,9 +52,10 @@ await $`npx prettier --write .`
 
 // Open in VS Code
 await $`code .`
+// await wait(700)
+await $`open -g rectangle://execute-action?name=left-half`
 
 // Open in browser
 await $`open -a "Google Chrome" http://localhost:${projectType === 'Next.js' ? 3000 : 5173}`
-
-// Start dev server
-await $`npm run dev`
+// await wait(700)
+await $`open -g rectangle://execute-action?name=right-half`
