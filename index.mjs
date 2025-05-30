@@ -7,12 +7,23 @@ import 'zx/globals'
 
 console.log(`\ncrepo - spin up your next repo in seconds\n`)
 
+if (process.stdin.isTTY) {
+    process.stdin.setRawMode(true);
+    process.stdin.resume();
+    process.stdin.setEncoding('utf8');
+
+    process.stdin.on('data', (key) => {
+        if (key === '\u001b') cleanExit('✌️')
+        if (key === '\u0003') cleanExit('✌️')
+    });
+}
+
 const projectType = await select({
     message: 'Choose a project type:',
     choices: ['Next.js', 'Vite (React + TS)'],
 })
 
-const name = await input({ message: 'Project name:' })
+const name = (await input({ message: 'Project name:' })).trim().toLowerCase().replace(/\s+/g, '-')
 
 if (projectType === 'Next.js') {
     await $({ stdio: 'inherit' })`npx create-next-app@latest ${name} --ts --eslint --use-npm --no-tailwind --app --no-src-dir --import-alias '@/*' --turbopack --no-interactive`
@@ -47,4 +58,14 @@ async function snapWindow(position) {
     if (isRectangleInstalled) {
         await $`open -g rectangle://execute-action?name=${position}`
     }
+}
+
+function cleanExit(message) {
+    if (process.stdin.isTTY) {
+        process.stdin.setRawMode(false);
+        process.stdin.pause();
+    }
+
+    console.log(`\n${message}`);
+    process.exit(0);
 }
