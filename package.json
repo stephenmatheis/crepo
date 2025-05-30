@@ -2,6 +2,14 @@
     "name": "mkrepo",
     "version": "1.0.0",
     "description": "Create a new Next.js or Vite repo with your preferred setup.",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/stephenmatheis/mkrepo.git"
+    },
+    "homepage": "https://github.com/stephenmatheis/mkrepo#readme",
+    "bugs": {
+        "url": "https://github.com/stephenmatheis/mkrepo/issues"
+    },
     "author": "Stephen Matheis",
     "license": "MIT",
     "keywords": [
@@ -13,14 +21,10 @@
         "mkrepo"
     ],
     "preferGlobal": true,
-    "main": "index.js",
     "bin": {
         "mkrepo": "./index.mjs"
     },
     "type": "module",
-    "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
-    },
     "dependencies": {
         "@inquirer/prompts": "^7.5.3",
         "zx": "^8.5.4"
