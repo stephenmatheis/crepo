@@ -35,9 +35,5 @@
         "gradient-string": "^3.0.0",
         "ora": "^8.2.0",
         "zx": "^8.5.4"
-    },
-    "devDependencies": {
-        "execa": "^9.6.0",
-        "fs-extra": "^11.3.0"
     }
 }
